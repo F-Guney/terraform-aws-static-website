@@ -1,0 +1,57 @@
+:root {
+  --bg: #fdfaf5;
+  --ink: #1a1714;
+  --muted: #7a6f63;
+  --measure: 32ch;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14110e;
+    --ink: #f4efe7;
+    --muted: #8a8073;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  font-size: clamp(1rem, 0.9rem + 0.4vw, 1.125rem);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+}
+
+main {
+  max-width: var(--measure);
+  text-align: center;
+}
+
+h1 {
+  margin: 0 0 0.5rem;
+  font-size: clamp(2.25rem, 1.5rem + 3.5vw, 4rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+p {
+  margin: 0;
+  color: var(--muted);
+}
