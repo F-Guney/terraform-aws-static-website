@@ -27,6 +27,16 @@ resource "aws_s3_bucket_public_access_block" "bucket" {
   restrict_public_buckets = true
 }
 
+resource "aws_s3_bucket_public_access_block" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+
 resource "aws_s3_object" "files" {
   for_each = local.site_files
 
@@ -39,6 +49,23 @@ resource "aws_s3_object" "files" {
   content_type = lookup(local.content_types, regex("[^.]+$", each.value), "application/octet-stream")
 }
 
+resource "aws_s3_bucket_lifecycle_configuration" "logs" {
+  bucket = aws_s3_bucket.logs.bucket
+
+  rule {
+    id     = "expire-old-logs"
+    status = "Enabled"
+
+    expiration {
+      days = 30
+    }
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+  }
+}
+
 resource "aws_cloudfront_origin_access_control" "bucket" {
   name                              = local.oac_name
   signing_behavior                  = "always"
@@ -49,6 +76,7 @@ resource "aws_cloudfront_origin_access_control" "bucket" {
 resource "aws_cloudfront_distribution" "distribution" {
   enabled             = true
   default_root_object = var.default_root_object
+  price_class         = var.cloudfront_price_class
 
   origin {
     domain_name              = aws_s3_bucket.bucket.bucket_regional_domain_name
@@ -72,6 +100,12 @@ resource "aws_cloudfront_distribution" "distribution" {
 
   viewer_certificate {
     cloudfront_default_certificate = true
+  }
+
+  logging_config {
+    bucket          = aws_s3_bucket.logs.bucket_domain_name
+    prefix          = "cloudfront/"
+    include_cookies = false
   }
 }
 

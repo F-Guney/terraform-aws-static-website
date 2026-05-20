@@ -14,6 +14,18 @@ variable "bucket_name" {
   }
 }
 
+variable "owner" {
+  type        = string
+  description = "Owner of the project."
+  default     = "demoadmin"
+}
+
+variable "cost_center" {
+  type        = string
+  description = "Billing identifier used to attribute spend in AWS Cost Explorer. Tag value, not a real charge code for portfolio use."
+  default     = "personal"
+}
+
 variable "project" {
   type        = string
   description = "Project name."
@@ -35,4 +47,10 @@ variable "site_source_dir" {
   type        = string
   description = "Local directory uploaded to the origin bucket."
   default     = "site"
+}
+
+variable "cloudfront_price_class" {
+  type        = string
+  description = "CloudFront price class."
+  default     = "PriceClass_100"
 }

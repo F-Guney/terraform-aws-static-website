@@ -1,23 +1,29 @@
 output "bucket_name" {
-  value = aws_s3_bucket.bucket.id
+  description = "Name of the bucket for site"
+  value       = aws_s3_bucket.bucket.id
 }
 
 output "cloudfront_url" {
-  value = "https://${aws_cloudfront_distribution.distribution.domain_name}"
+  description = "Public HTTPS URL of the distribution. Use this in browsers and smoke tests."
+  value       = "https://${aws_cloudfront_distribution.distribution.domain_name}"
 }
 
 output "distribution_id" {
-  value = aws_cloudfront_distribution.distribution.id
+  description = "ID of the CloudFront distribution"
+  value       = aws_cloudfront_distribution.distribution.id
 }
 
 output "distribution_domain_name" {
-  value = aws_cloudfront_distribution.distribution.domain_name
+  description = "Domain name of the CloudFront distribution"
+  value       = aws_cloudfront_distribution.distribution.domain_name
 }
 
 output "bucket_arn" {
-  value = aws_s3_bucket.bucket.arn
+  description = "ARN of the bucket"
+  value       = aws_s3_bucket.bucket.arn
 }
 
 output "oac_id" {
-  value = aws_cloudfront_origin_access_control.bucket.id
+  description = "ID of the origin access control"
+  value       = aws_cloudfront_origin_access_control.bucket.id
 }
