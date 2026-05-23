@@ -20,6 +20,7 @@ flowchart LR
 
 - Private S3 origin (public access blocked, AES256 SSE, versioning on)
 - CloudFront distribution with OAC, HTTPS-only viewer policy, `PriceClass_100` (US + EU + IL) by default
+- Per-extension cache headers on uploads: HTML revalidates every 5 min, JS/CSS cached for a year (`immutable`), images 1 day
 - Sibling logs bucket capturing both S3 and CloudFront access logs, expiring after 30 days
 - `default_tags` propagating `Project`, `Environment`, `Owner`, `CostCenter`, `Repository` to every taggable resource
 
@@ -43,9 +44,7 @@ The `cloudfront_url` output is the public URL. First-deploy propagation takes a 
 
 ## Updating the site
 
-Edit anything under `site/`, then re-run `terraform apply`.
-
-> Note: CloudFront caches the previous object for up to 24 h. Manual invalidation is needed until automated invalidation lands (see `REVISION.md` § 2).
+Edit anything under `site/`, then re-run `terraform apply`. CloudFront is invalidated automatically on every file change, so updates show up within ~30 seconds instead of waiting for the cache TTL.
 
 ## Cleanup
 

@@ -46,7 +46,8 @@ resource "aws_s3_object" "files" {
 
   etag = filemd5("${var.site_source_dir}/${each.value}")
 
-  content_type = lookup(local.content_types, regex("[^.]+$", each.value), "application/octet-stream")
+  cache_control = lookup(local.cache_control_by_extension, regex("[^.]+$", each.value), "public, max-age=300")
+  content_type  = lookup(local.content_types, regex("[^.]+$", each.value), "application/octet-stream")
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "logs" {
@@ -106,6 +107,24 @@ resource "aws_cloudfront_distribution" "distribution" {
     bucket          = aws_s3_bucket.logs.bucket_domain_name
     prefix          = "cloudfront/"
     include_cookies = false
+  }
+}
+
+action "aws_cloudfront_create_invalidation" "invalidate" {
+  config {
+    distribution_id = aws_cloudfront_distribution.distribution.id
+    paths           = ["/*"]
+  }
+}
+
+resource "terraform_data" "invalidate" {
+  input = sha1(jsonencode({ for k, v in aws_s3_object.files : k => v.etag }))
+
+  lifecycle {
+    action_trigger {
+      events  = [before_create, before_update]
+      actions = [action.aws_cloudfront_create_invalidation.invalidate]
+    }
   }
 }
 

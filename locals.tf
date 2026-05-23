@@ -13,6 +13,16 @@ locals {
   oac_name         = "${local.name_prefix}-oac"
   origin_id        = "${local.name_prefix}-s3-origin"
 
+  cache_control_by_extension = {
+    html = "public, max-age=300, must-revalidate"
+    css  = "public, max-age=31536000, immutable"
+    js   = "public, max-age=31536000, immutable"
+    svg  = "public, max-age=86400"
+    png  = "public, max-age=86400"
+    jpg  = "public, max-age=86400"
+    json = "public, max-age=60"
+  }
+
   content_types = {
     "html"  = "text/html"
     "css"   = "text/css"
