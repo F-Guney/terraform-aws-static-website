@@ -1,0 +1,101 @@
+resource "aws_s3_bucket" "site" {
+  bucket        = var.bucket_name
+  tags          = var.tags
+  force_destroy = true
+}
+
+resource "aws_s3_bucket_public_access_block" "site" {
+  bucket = aws_s3_bucket.site.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "site" {
+  bucket = aws_s3_bucket.site.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_versioning" "site" {
+  bucket = aws_s3_bucket.site.id
+
+  versioning_configuration {
+    status = var.enable_versioning ? "Enabled" : "Suspended"
+  }
+}
+
+resource "aws_s3_bucket_logging" "site" {
+  bucket        = aws_s3_bucket.site.id
+  target_bucket = aws_s3_bucket.logs.id
+  target_prefix = "s3/"
+}
+
+resource "aws_s3_object" "files" {
+  for_each = local.site_files
+
+  bucket = aws_s3_bucket.site.id
+  key    = each.value
+  source = "${var.site_source_dir}/${each.value}"
+
+  etag = filemd5("${var.site_source_dir}/${each.value}")
+
+  cache_control = lookup(local.cache_control_by_extension, regex("[^.]+$", each.value), "public, max-age=300")
+  content_type  = lookup(local.content_types, regex("[^.]+$", each.value), "application/octet-stream")
+}
+
+resource "aws_s3_bucket" "logs" {
+  bucket        = local.logs_bucket_name
+  tags          = var.tags
+  force_destroy = true
+}
+
+resource "aws_s3_bucket_public_access_block" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_ownership_controls" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "logs" {
+  bucket = aws_s3_bucket.logs.bucket
+
+  rule {
+    id     = "expire-old-logs"
+    status = "Enabled"
+
+    expiration {
+      days = var.logs_retention_days
+    }
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+  }
+}
