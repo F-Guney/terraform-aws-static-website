@@ -1,0 +1,5 @@
+bucket       = "prod-terraform-state"
+key          = "aws-static-website/prod/terraform.tfstate"
+region       = "eu-central-1"
+encrypt      = true
+use_lockfile = true

@@ -63,7 +63,7 @@ Costs come from CloudFront egress/requests and S3 storage. Idle portfolio traffi
 
 ## Prerequisites
 
-- Terraform `>= 1.6`
+- Terraform `>= 1.11` (the S3 backend uses native `use_lockfile` state locking)
 - AWS credentials with permission to create S3 buckets and CloudFront distributions
 - A globally-unique S3 bucket name
 
@@ -71,13 +71,26 @@ Costs come from CloudFront egress/requests and S3 storage. Idle portfolio traffi
 
 ```bash
 cp terraform.tfvars.example terraform.tfvars
+cp backends/dev.s3.tfbackend.example backends/dev.s3.tfbackend
 # edit terraform.tfvars: set bucket_name and project
-terraform init
+terraform init -backend-config=backends/dev.s3.tfbackend
 terraform plan
 terraform apply
 ```
 
 The `cloudfront_url` output is the public URL. First-deploy propagation takes a few minutes.
+
+## Remote state
+
+State is kept in an S3 backend, declared as a partial config (`backend "s3" {}` in `terraform.tf`) so the target is chosen at init time per environment:
+
+```bash
+cp backends/<env>.s3.tfbackend.example backends/<env>.s3.tfbackend
+# edit the copy: set bucket, key, and region
+terraform init -backend-config=backends/<env>.s3.tfbackend
+```
+
+Each `backends/<env>.s3.tfbackend` is gitignored; commit only the `.example` templates.
 
 ## Updating the site
 
