@@ -1,4 +1,4 @@
-# aws-static-infra
+# terraform-aws-static-website
 
 Terraform that provisions an S3 + CloudFront (OAC) stack to host a static site on AWS.
 

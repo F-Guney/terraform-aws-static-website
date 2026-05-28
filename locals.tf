@@ -5,7 +5,7 @@ locals {
     ManagedBy   = "Terraform"
     Owner       = var.owner
     CostCenter  = var.cost_center
-    Repository  = "github.com/furkanguney/aws-static-infra"
+    Repository  = "github.com/F-Guney/terraform-aws-static-website"
   }
 
   name_prefix = "${var.project}-${var.environment}"
