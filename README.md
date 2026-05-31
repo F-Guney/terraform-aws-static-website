@@ -37,7 +37,7 @@ flowchart LR
 | default\_root\_object | Object CloudFront serves at the distribution root. | `string` | `"index.html"` | no |
 | environment | Environment name. | `string` | `"dev"` | no |
 | owner | Owner of the project. | `string` | `"demoadmin"` | no |
-| site\_source\_dir | Local directory uploaded to the origin bucket. | `string` | `"site"` | no |
+| site\_source\_dir | Local directory uploaded to the origin bucket. | `string` | `"www"` | no |
 
 ## Outputs
 

@@ -18,4 +18,4 @@ repos:
       - id: terraform_docs
         args:
           - --hook-config=--add-to-existing-file=true
-          - --args=--config=__GIT_WORKING_DIR__/.terraform-docs.yml
+          - --args=--config=.terraform-docs.yml
