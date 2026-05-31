@@ -12,5 +12,5 @@ variable "bucket_name" {
 variable "site_source_dir" {
   description = "Directory to upload as the site origin. Defaults to the repo's site/."
   type        = string
-  default     = "../../site"
+  default     = "www"
 }

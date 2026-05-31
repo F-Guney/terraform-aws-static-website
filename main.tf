@@ -22,6 +22,8 @@ module "cdn" {
   origin_bucket_arn             = module.storage.site_bucket_arn
   origin_bucket_regional_domain = module.storage.site_bucket_regional_domain_name
   logging_bucket_domain_name    = module.storage.logs_bucket_domain_name
+  default_root_object           = var.default_root_object
+  price_class                   = var.cloudfront_price_class
 }
 
 action "aws_cloudfront_create_invalidation" "invalidate" {

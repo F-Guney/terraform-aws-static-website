@@ -94,7 +94,15 @@ Each `backends/<env>.s3.tfbackend` is gitignored; commit only the `.example` tem
 
 ## Updating the site
 
-Edit anything under `site/`, then re-run `terraform apply`. CloudFront is invalidated automatically on every file change, so updates show up within ~30 seconds instead of waiting for the cache TTL.
+Edit any file under your `site_source_dir` (the runnable examples ship one under `examples/minimal/www/`), then re-run `terraform apply`. CloudFront is invalidated automatically on every file change, so updates show up within ~30 seconds instead of waiting for the cache TTL.
+
+## Development
+
+```bash
+pre-commit install && pre-commit run --all-files   # fmt, validate, tflint, terraform-docs
+tflint --init && tflint --recursive                # AWS-specific lint across modules
+terraform test                                     # tftest coverage in tests/
+```
 
 ## Cleanup
 

@@ -17,5 +17,5 @@ variable "bucket_name_b" {
 variable "site_source_dir" {
   description = "Directory to upload as the site origin for both stacks."
   type        = string
-  default     = "../../site"
+  default     = "www"
 }

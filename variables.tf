@@ -46,7 +46,7 @@ variable "default_root_object" {
 variable "site_source_dir" {
   type        = string
   description = "Local directory uploaded to the origin bucket."
-  default     = "site"
+  default     = "www"
 }
 
 variable "cloudfront_price_class" {
