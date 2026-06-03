@@ -30,9 +30,26 @@ variable "price_class" {
   default     = "PriceClass_100"
 }
 
-variable "logging_bucket_domain_name" {
-  description = "Optional logs bucket domain. If set, CloudFront access logs are written here."
+variable "logging_bucket_id" {
+  description = "ID of the S3 bucket for logs"
   type        = string
+}
+
+variable "logging_bucket_arn" {
+  description = "ARN of the S3 bucket for logs"
+  type        = string
+}
+
+variable "acm_certificate_arn" {
+  description = "ARN of an ACM certificate in us-east-1. Null uses the default *.cloudfront.net cert."
+  type        = string
+  default     = null
+}
+
+variable "aliases" {
+  description = "Alternate domain names (CNAMEs). Only applied when a custom cert is set."
+  type        = list(string)
+  default     = []
 }
 
 variable "tags" {

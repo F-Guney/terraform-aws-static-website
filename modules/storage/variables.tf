@@ -13,7 +13,6 @@ variable "site_source_dir" {
   type        = string
 }
 
-
 variable "tags" {
   description = "Tags applied to every resource the module creates."
   type        = map(string)
@@ -36,4 +35,10 @@ variable "logs_retention_days" {
   description = "Days to retain access logs before lifecycle expiration."
   type        = number
   default     = 30
+}
+
+variable "kms_key_arn" {
+  description = "KMS key ARN (in the bucket's region) for SSE-KMS. Null uses SSE-S3 (AES256)."
+  type        = string
+  default     = null
 }

@@ -13,16 +13,16 @@ flowchart LR
     user -->|HTTPS| cf
     cf -->|sigv4 via OAC| s3
     cf -.access logs.-> logs
-    s3 -.access logs.-> logs
 ```
 
 ## What you get
 
-- Private S3 origin (public access blocked, AES256 SSE, versioning on)
-- CloudFront distribution with OAC, HTTPS-only viewer policy, `PriceClass_100` (US + EU + IL) by default
+- Private S3 origin: public access blocked, `BucketOwnerEnforced`, versioning on, AES256 by default with opt-in SSE-KMS via `kms_key_arn`
+- CloudFront distribution with OAC, HTTPS-only viewer policy, `PriceClass_100` (US + EU + IL) by default; `TLSv1.2_2021` floor when a custom ACM cert is wired
 - Per-extension cache headers on uploads: HTML revalidates every 5 min, JS/CSS cached for a year (`immutable`), images 1 day
-- Sibling logs bucket capturing both S3 and CloudFront access logs, expiring after 30 days
-- `default_tags` propagating `Project`, `Environment`, `Owner`, `CostCenter`, `Repository` to every taggable resource
+- Sibling logs bucket receiving CloudFront access logs via CloudWatch Log Delivery v2, expiring after 30 days
+- Optional custom domain: pass `acm_certificate_arn` (in us-east-1) and `aliases` to attach CNAMEs
+- `default_tags` propagating `Project`, `Environment`, `ManagedBy`, `Owner`, `CostCenter`, `Repository` to every taggable resource
 
 <!-- BEGIN_TF_DOCS -->
 ## Inputs
@@ -31,11 +31,14 @@ flowchart LR
 | ---- | ----------- | ---- | ------- | :------: |
 | bucket\_name | Globally-unique S3 bucket name for the site origin. | `string` | n/a | yes |
 | project | Project name. | `string` | n/a | yes |
+| acm\_certificate\_arn | ARN of an ACM cert in us-east-1 for the distribution. Null uses the default CloudFront cert. | `string` | `null` | no |
+| aliases | Alternate domain names (CNAMEs) for the distribution. | `list(string)` | `[]` | no |
 | aws\_region | AWS region to deploy resources to | `string` | `"eu-central-1"` | no |
 | cloudfront\_price\_class | CloudFront price class. | `string` | `"PriceClass_100"` | no |
 | cost\_center | Billing identifier used to attribute spend in AWS Cost Explorer. Tag value, not a real charge code for portfolio use. | `string` | `"personal"` | no |
 | default\_root\_object | Object CloudFront serves at the distribution root. | `string` | `"index.html"` | no |
 | environment | Environment name. | `string` | `"dev"` | no |
+| kms\_key\_arn | KMS key ARN (same region as the origin bucket) for SSE-KMS. Null uses AES256. | `string` | `null` | no |
 | owner | Owner of the project. | `string` | `"demoadmin"` | no |
 | site\_source\_dir | Local directory uploaded to the origin bucket. | `string` | `"www"` | no |
 
@@ -63,22 +66,25 @@ Costs come from CloudFront egress/requests and S3 storage. Idle portfolio traffi
 
 ## Prerequisites
 
-- Terraform `>= 1.11` (the S3 backend uses native `use_lockfile` state locking)
+- Terraform `>= 1.14.0` (uses the Terraform Actions feature for automatic CloudFront invalidation; the S3 backend uses native `use_lockfile` state locking)
 - AWS credentials with permission to create S3 buckets and CloudFront distributions
 - A globally-unique S3 bucket name
+- A directory of site files pointed at by `site_source_dir` — `examples/minimal/www/` is the bundled demo
 
 ## Quickstart
 
 ```bash
 cp terraform.tfvars.example terraform.tfvars
 cp backends/dev.s3.tfbackend.example backends/dev.s3.tfbackend
-# edit terraform.tfvars: set bucket_name and project
+# edit terraform.tfvars: set bucket_name, project, and site_source_dir
 terraform init -backend-config=backends/dev.s3.tfbackend
 terraform plan
 terraform apply
 ```
 
 The `cloudfront_url` output is the public URL. First-deploy propagation takes a few minutes.
+
+> If `site_source_dir` points at a path that doesn't exist, `fileset()` returns empty and no objects are uploaded — apply succeeds but CloudFront serves 403 on every request. Verify the directory exists before applying.
 
 ## Remote state
 

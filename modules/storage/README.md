@@ -22,6 +22,7 @@ module "storage" {
 | bucket\_name | Unique S3 bucket name for the site origin (must follow S3 naming rules). | `string` | n/a | yes |
 | site\_source\_dir | Local directory whose contents will be uploaded to the origin bucket. | `string` | n/a | yes |
 | enable\_versioning | Toggle S3 object versioning on the origin bucket. | `bool` | `true` | no |
+| kms\_key\_arn | KMS key ARN (in the bucket's region) for SSE-KMS. Null uses SSE-S3 (AES256). | `string` | `null` | no |
 | logs\_bucket\_suffix | Suffix appended to bucket\_name to derive the logs bucket name. | `string` | `"-logs"` | no |
 | logs\_retention\_days | Days to retain access logs before lifecycle expiration. | `number` | `30` | no |
 | tags | Tags applied to every resource the module creates. | `map(string)` | `{}` | no |
@@ -30,7 +31,7 @@ module "storage" {
 
 | Name | Description |
 | ---- | ----------- |
-| logs\_bucket\_domain\_name | Domain name of the bucket for logs |
+| logs\_bucket\_arn | ARN of the bucket for logs |
 | logs\_bucket\_id | ID of the bucket for logs |
 | site\_bucket\_arn | ARN of the bucket for site |
 | site\_bucket\_id | ID of the bucket for site |

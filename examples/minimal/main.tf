@@ -17,6 +17,7 @@ module "cdn" {
   origin_bucket_id              = module.storage.site_bucket_id
   origin_bucket_arn             = module.storage.site_bucket_arn
   origin_bucket_regional_domain = module.storage.site_bucket_regional_domain_name
-  logging_bucket_domain_name    = module.storage.logs_bucket_domain_name
+  logging_bucket_arn            = module.storage.logs_bucket_arn
+  logging_bucket_id             = module.storage.logs_bucket_id
   tags                          = { Project = "example-minimal" }
 }

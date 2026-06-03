@@ -18,4 +18,8 @@ repos:
       - id: terraform_docs
         args:
           - --hook-config=--add-to-existing-file=true
-          - --args=--config=.terraform-docs.yml
+          - --args=--sort-by=required
+          - --args=--show=inputs
+          - --args=--show=outputs
+          - --args=--anchor=false
+          - --args=--html=false

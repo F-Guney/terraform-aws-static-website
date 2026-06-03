@@ -18,9 +18,9 @@ output "logs_bucket_id" {
   value       = aws_s3_bucket.logs.id
 }
 
-output "logs_bucket_domain_name" {
-  description = "Domain name of the bucket for logs"
-  value       = aws_s3_bucket.logs.bucket_domain_name
+output "logs_bucket_arn" {
+  description = "ARN of the bucket for logs"
+  value       = aws_s3_bucket.logs.arn
 }
 
 output "site_files_hash" {

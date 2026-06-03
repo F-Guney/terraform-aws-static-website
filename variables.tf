@@ -54,3 +54,21 @@ variable "cloudfront_price_class" {
   description = "CloudFront price class."
   default     = "PriceClass_100"
 }
+
+variable "acm_certificate_arn" {
+  type        = string
+  description = "ARN of an ACM cert in us-east-1 for the distribution. Null uses the default CloudFront cert."
+  default     = null
+}
+
+variable "aliases" {
+  type        = list(string)
+  description = "Alternate domain names (CNAMEs) for the distribution."
+  default     = []
+}
+
+variable "kms_key_arn" {
+  type        = string
+  description = "KMS key ARN (same region as the origin bucket) for SSE-KMS. Null uses AES256."
+  default     = null
+}

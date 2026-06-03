@@ -49,6 +49,16 @@ run "wiring_defaults" {
     condition     = aws_s3_bucket_versioning.site.versioning_configuration[0].status == "Enabled"
     error_message = "versioning must default to Enabled"
   }
+
+  assert {
+    condition     = aws_s3_bucket_ownership_controls.site.rule[0].object_ownership == "BucketOwnerEnforced"
+    error_message = "site bucket must enforce BucketOwnerEnforced"
+  }
+
+  assert {
+    condition     = aws_s3_bucket_ownership_controls.logs.rule[0].object_ownership == "BucketOwnerEnforced"
+    error_message = "logs bucket must enforce BucketOwnerEnforced"
+  }
 }
 
 run "versioning_can_be_suspended" {
@@ -86,5 +96,24 @@ run "logs_retention_honored" {
   assert {
     condition     = aws_s3_bucket_lifecycle_configuration.logs.rule[0].expiration[0].days == 7
     error_message = "lifecycle expiration must match logs_retention_days input"
+  }
+}
+
+run "kms_opt_in_uses_aws_kms" {
+  command = plan
+
+  module {
+    source = "./modules/storage"
+  }
+
+  variables {
+    bucket_name     = "test-storage-example"
+    site_source_dir = "./examples/minimal/site"
+    kms_key_arn     = "arn:aws:kms:eu-central-1:123456789012:key/00000000-0000-0000-0000-000000000000"
+  }
+
+  assert {
+    condition     = one(aws_s3_bucket_server_side_encryption_configuration.site.rule).apply_server_side_encryption_by_default[0].sse_algorithm == "aws:kms"
+    error_message = "kms_key_arn must switch sse_algorithm to aws:kms"
   }
 }
