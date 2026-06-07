@@ -10,32 +10,40 @@ variables {
 run "wiring_defaults" {
   command = plan
 
+  override_resource {
+    target          = aws_cloudfront_distribution.this
+    override_during = plan
+    values = {
+      arn = "arn:aws:cloudfront::123456789012:distribution/E1EXAMPLE"
+    }
+  }
+
   module {
     source = "./modules/cdn"
   }
 
   assert {
-    condition     = aws_cloudfront_distribution.distribution.default_cache_behavior[0].viewer_protocol_policy == "redirect-to-https"
+    condition     = aws_cloudfront_distribution.this.default_cache_behavior[0].viewer_protocol_policy == "redirect-to-https"
     error_message = "viewer policy must redirect http to https"
   }
 
   assert {
-    condition     = aws_cloudfront_distribution.distribution.price_class == "PriceClass_100"
+    condition     = aws_cloudfront_distribution.this.price_class == "PriceClass_100"
     error_message = "price_class must default to PriceClass_100"
   }
 
   assert {
-    condition     = aws_cloudfront_distribution.distribution.default_root_object == "index.html"
+    condition     = aws_cloudfront_distribution.this.default_root_object == "index.html"
     error_message = "default_root_object must default to index.html"
   }
 
   assert {
-    condition     = aws_cloudfront_origin_access_control.control.signing_protocol == "sigv4" && aws_cloudfront_origin_access_control.control.signing_behavior == "always"
+    condition     = aws_cloudfront_origin_access_control.this.signing_protocol == "sigv4" && aws_cloudfront_origin_access_control.this.signing_behavior == "always"
     error_message = "OAC must use SigV4 always-sign"
   }
 
   assert {
-    condition     = jsondecode(aws_s3_bucket_policy.bucket.policy).Statement[0].Condition.StringEquals["AWS:SourceArn"] == aws_cloudfront_distribution.distribution.arn
+    condition     = jsondecode(aws_s3_bucket_policy.origin.policy).Statement[0].Condition.StringEquals["AWS:SourceArn"] == aws_cloudfront_distribution.this.arn
     error_message = "OAC bucket policy must scope AWS:SourceArn to the distribution ARN"
   }
 }
@@ -58,7 +66,7 @@ run "price_class_overridable" {
   }
 
   assert {
-    condition     = aws_cloudfront_distribution.distribution.price_class == "PriceClass_200"
+    condition     = aws_cloudfront_distribution.this.price_class == "PriceClass_200"
     error_message = "price_class must be overridable per environment"
   }
 }
@@ -82,7 +90,47 @@ run "custom_cert_sets_tls_floor" {
   }
 
   assert {
-    condition     = aws_cloudfront_distribution.distribution.viewer_certificate[0].minimum_protocol_version == "TLSv1.2_2021"
+    condition     = aws_cloudfront_distribution.this.viewer_certificate[0].minimum_protocol_version == "TLSv1.2_2021"
     error_message = "custom cert must pin minimum_protocol_version to TLSv1.2_2021"
   }
+}
+
+run "rejects_invalid_price_class" {
+  command = plan
+
+  module {
+    source = "./modules/cdn"
+  }
+
+  variables {
+    name_prefix                   = "test-cdn"
+    origin_bucket_id              = "test-origin-bucket"
+    origin_bucket_arn             = "arn:aws:s3:::test-origin-bucket"
+    origin_bucket_regional_domain = "test-origin-bucket.s3.eu-central-1.amazonaws.com"
+    logging_bucket_id             = "test-logging-bucket"
+    logging_bucket_arn            = "arn:aws:s3:::test-logging-bucket"
+    price_class                   = "PriceClass_999"
+  }
+
+  expect_failures = [var.price_class]
+}
+
+run "aliases_without_cert_rejected" {
+  command = plan
+
+  module {
+    source = "./modules/cdn"
+  }
+
+  variables {
+    name_prefix                   = "test-cdn"
+    origin_bucket_id              = "test-origin-bucket"
+    origin_bucket_arn             = "arn:aws:s3:::test-origin-bucket"
+    origin_bucket_regional_domain = "test-origin-bucket.s3.eu-central-1.amazonaws.com"
+    logging_bucket_id             = "test-logging-bucket"
+    logging_bucket_arn            = "arn:aws:s3:::test-logging-bucket"
+    aliases                       = ["example.com"]
+  }
+
+  expect_failures = [aws_cloudfront_distribution.this]
 }

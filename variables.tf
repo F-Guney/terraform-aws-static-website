@@ -1,12 +1,12 @@
 variable "aws_region" {
-  type        = string
   description = "AWS region to deploy resources to"
+  type        = string
   default     = "eu-central-1"
 }
 
 variable "bucket_name" {
-  type        = string
   description = "Globally-unique S3 bucket name for the site origin."
+  type        = string
 
   validation {
     condition     = can(regex("^[a-z0-9][a-z0-9.-]*[a-z0-9]$", var.bucket_name)) && length(var.bucket_name) >= 3 && length(var.bucket_name) <= 63
@@ -15,60 +15,65 @@ variable "bucket_name" {
 }
 
 variable "owner" {
-  type        = string
   description = "Owner of the project."
+  type        = string
   default     = "demoadmin"
 }
 
 variable "cost_center" {
-  type        = string
   description = "Billing identifier used to attribute spend in AWS Cost Explorer. Tag value, not a real charge code for portfolio use."
+  type        = string
   default     = "personal"
 }
 
 variable "project" {
-  type        = string
   description = "Project name."
+  type        = string
 }
 
 variable "environment" {
-  type        = string
   description = "Environment name."
+  type        = string
   default     = "dev"
 }
 
 variable "default_root_object" {
-  type        = string
   description = "Object CloudFront serves at the distribution root."
+  type        = string
   default     = "index.html"
 }
 
 variable "site_source_dir" {
-  type        = string
   description = "Local directory uploaded to the origin bucket."
+  type        = string
   default     = "www"
 }
 
 variable "cloudfront_price_class" {
-  type        = string
   description = "CloudFront price class."
+  type        = string
   default     = "PriceClass_100"
+
+  validation {
+    condition     = contains(["PriceClass_100", "PriceClass_200", "PriceClass_All"], var.cloudfront_price_class)
+    error_message = "cloudfront_price_class must be one of PriceClass_100, PriceClass_200, PriceClass_All."
+  }
 }
 
 variable "acm_certificate_arn" {
-  type        = string
   description = "ARN of an ACM cert in us-east-1 for the distribution. Null uses the default CloudFront cert."
+  type        = string
   default     = null
 }
 
 variable "aliases" {
-  type        = list(string)
   description = "Alternate domain names (CNAMEs) for the distribution."
+  type        = list(string)
   default     = []
 }
 
 variable "kms_key_arn" {
-  type        = string
   description = "KMS key ARN (same region as the origin bucket) for SSE-KMS. Null uses AES256."
+  type        = string
   default     = null
 }

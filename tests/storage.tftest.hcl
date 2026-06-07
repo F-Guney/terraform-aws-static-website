@@ -11,7 +11,7 @@ run "wiring_defaults" {
   }
 
   assert {
-    condition     = aws_s3_bucket.site.bucket == "test-storage-example"
+    condition     = aws_s3_bucket.origin.bucket == "test-storage-example"
     error_message = "site bucket name must match bucket_name input"
   }
 
@@ -22,10 +22,10 @@ run "wiring_defaults" {
 
   assert {
     condition = (
-      aws_s3_bucket_public_access_block.site.block_public_acls &&
-      aws_s3_bucket_public_access_block.site.block_public_policy &&
-      aws_s3_bucket_public_access_block.site.ignore_public_acls &&
-      aws_s3_bucket_public_access_block.site.restrict_public_buckets
+      aws_s3_bucket_public_access_block.origin.block_public_acls &&
+      aws_s3_bucket_public_access_block.origin.block_public_policy &&
+      aws_s3_bucket_public_access_block.origin.ignore_public_acls &&
+      aws_s3_bucket_public_access_block.origin.restrict_public_buckets
     )
     error_message = "site bucket must block all four forms of public access"
   }
@@ -41,17 +41,17 @@ run "wiring_defaults" {
   }
 
   assert {
-    condition     = one(aws_s3_bucket_server_side_encryption_configuration.site.rule).apply_server_side_encryption_by_default[0].sse_algorithm == "AES256"
+    condition     = one(aws_s3_bucket_server_side_encryption_configuration.origin.rule).apply_server_side_encryption_by_default[0].sse_algorithm == "AES256"
     error_message = "site bucket must enforce AES256 server-side encryption"
   }
 
   assert {
-    condition     = aws_s3_bucket_versioning.site.versioning_configuration[0].status == "Enabled"
+    condition     = aws_s3_bucket_versioning.origin.versioning_configuration[0].status == "Enabled"
     error_message = "versioning must default to Enabled"
   }
 
   assert {
-    condition     = aws_s3_bucket_ownership_controls.site.rule[0].object_ownership == "BucketOwnerEnforced"
+    condition     = aws_s3_bucket_ownership_controls.origin.rule[0].object_ownership == "BucketOwnerEnforced"
     error_message = "site bucket must enforce BucketOwnerEnforced"
   }
 
@@ -69,14 +69,14 @@ run "versioning_can_be_suspended" {
   }
 
   variables {
-    bucket_name       = "test-storage-example"
-    site_source_dir   = "./examples/minimal/site"
-    enable_versioning = false
+    bucket_name        = "test-storage-example"
+    site_source_dir    = "./examples/minimal/site"
+    versioning_enabled = false
   }
 
   assert {
-    condition     = aws_s3_bucket_versioning.site.versioning_configuration[0].status == "Suspended"
-    error_message = "versioning must suspend when enable_versioning = false"
+    condition     = aws_s3_bucket_versioning.origin.versioning_configuration[0].status == "Suspended"
+    error_message = "versioning must suspend when versioning_enabled = false"
   }
 }
 
@@ -113,7 +113,7 @@ run "kms_opt_in_uses_aws_kms" {
   }
 
   assert {
-    condition     = one(aws_s3_bucket_server_side_encryption_configuration.site.rule).apply_server_side_encryption_by_default[0].sse_algorithm == "aws:kms"
+    condition     = one(aws_s3_bucket_server_side_encryption_configuration.origin.rule).apply_server_side_encryption_by_default[0].sse_algorithm == "aws:kms"
     error_message = "kms_key_arn must switch sse_algorithm to aws:kms"
   }
 }

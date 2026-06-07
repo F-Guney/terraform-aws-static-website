@@ -1,6 +1,6 @@
 output "bucket_name" {
   description = "Name of the bucket for site"
-  value       = module.storage.site_bucket_id
+  value       = module.storage.origin_bucket_id
 }
 
 output "cloudfront_url" {
@@ -20,7 +20,7 @@ output "distribution_domain_name" {
 
 output "bucket_arn" {
   description = "ARN of the bucket"
-  value       = module.storage.site_bucket_arn
+  value       = module.storage.origin_bucket_arn
 }
 
 output "oac_id" {

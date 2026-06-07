@@ -1,11 +1,11 @@
-resource "aws_s3_bucket" "site" {
+resource "aws_s3_bucket" "origin" {
   bucket        = var.bucket_name
   tags          = var.tags
   force_destroy = true
 }
 
-resource "aws_s3_bucket_public_access_block" "site" {
-  bucket = aws_s3_bucket.site.id
+resource "aws_s3_bucket_public_access_block" "origin" {
+  bucket = aws_s3_bucket.origin.id
 
   block_public_acls       = true
   block_public_policy     = true
@@ -13,16 +13,16 @@ resource "aws_s3_bucket_public_access_block" "site" {
   restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket_ownership_controls" "site" {
-  bucket = aws_s3_bucket.site.id
+resource "aws_s3_bucket_ownership_controls" "origin" {
+  bucket = aws_s3_bucket.origin.id
 
   rule {
     object_ownership = "BucketOwnerEnforced"
   }
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "site" {
-  bucket = aws_s3_bucket.site.id
+resource "aws_s3_bucket_server_side_encryption_configuration" "origin" {
+  bucket = aws_s3_bucket.origin.id
 
   rule {
     apply_server_side_encryption_by_default {
@@ -34,18 +34,18 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "site" {
   }
 }
 
-resource "aws_s3_bucket_versioning" "site" {
-  bucket = aws_s3_bucket.site.id
+resource "aws_s3_bucket_versioning" "origin" {
+  bucket = aws_s3_bucket.origin.id
 
   versioning_configuration {
-    status = var.enable_versioning ? "Enabled" : "Suspended"
+    status = var.versioning_enabled ? "Enabled" : "Suspended"
   }
 }
 
 resource "aws_s3_object" "files" {
   for_each = local.site_files
 
-  bucket = aws_s3_bucket.site.id
+  bucket = aws_s3_bucket.origin.id
   key    = each.value
   source = "${var.site_source_dir}/${each.value}"
 

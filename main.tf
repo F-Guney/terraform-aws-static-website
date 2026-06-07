@@ -19,9 +19,9 @@ module "cdn" {
   source = "./modules/cdn"
 
   name_prefix                   = local.name_prefix
-  origin_bucket_id              = module.storage.site_bucket_id
-  origin_bucket_arn             = module.storage.site_bucket_arn
-  origin_bucket_regional_domain = module.storage.site_bucket_regional_domain_name
+  origin_bucket_id              = module.storage.origin_bucket_id
+  origin_bucket_arn             = module.storage.origin_bucket_arn
+  origin_bucket_regional_domain = module.storage.origin_bucket_regional_domain_name
   logging_bucket_arn            = module.storage.logs_bucket_arn
   logging_bucket_id             = module.storage.logs_bucket_id
   acm_certificate_arn           = var.acm_certificate_arn

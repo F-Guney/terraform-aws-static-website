@@ -1,6 +1,6 @@
 variable "bucket_name" {
-  type        = string
   description = "Unique S3 bucket name for the site origin (must follow S3 naming rules)."
+  type        = string
 
   validation {
     condition     = can(regex("^[a-z0-9][a-z0-9.-]*[a-z0-9]$", var.bucket_name)) && length(var.bucket_name) >= 3 && length(var.bucket_name) <= 63
@@ -19,7 +19,7 @@ variable "tags" {
   default     = {}
 }
 
-variable "enable_versioning" {
+variable "versioning_enabled" {
   description = "Toggle S3 object versioning on the origin bucket."
   type        = bool
   default     = true

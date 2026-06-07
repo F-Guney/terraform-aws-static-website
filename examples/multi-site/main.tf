@@ -22,9 +22,9 @@ module "cdn_a" {
   source = "../../modules/cdn"
 
   name_prefix                   = "example-multi-a"
-  origin_bucket_id              = module.storage_a.site_bucket_id
-  origin_bucket_arn             = module.storage_a.site_bucket_arn
-  origin_bucket_regional_domain = module.storage_a.site_bucket_regional_domain_name
+  origin_bucket_id              = module.storage_a.origin_bucket_id
+  origin_bucket_arn             = module.storage_a.origin_bucket_arn
+  origin_bucket_regional_domain = module.storage_a.origin_bucket_regional_domain_name
   logging_bucket_id             = module.storage_a.logs_bucket_id
   logging_bucket_arn            = module.storage_a.logs_bucket_arn
   tags                          = { Project = "example-multi", Stack = "a" }
@@ -34,9 +34,9 @@ module "cdn_b" {
   source = "../../modules/cdn"
 
   name_prefix                   = "example-multi-b"
-  origin_bucket_id              = module.storage_b.site_bucket_id
-  origin_bucket_arn             = module.storage_b.site_bucket_arn
-  origin_bucket_regional_domain = module.storage_b.site_bucket_regional_domain_name
+  origin_bucket_id              = module.storage_b.origin_bucket_id
+  origin_bucket_arn             = module.storage_b.origin_bucket_arn
+  origin_bucket_regional_domain = module.storage_b.origin_bucket_regional_domain_name
   logging_bucket_id             = module.storage_b.logs_bucket_id
   logging_bucket_arn            = module.storage_b.logs_bucket_arn
   tags                          = { Project = "example-multi", Stack = "b" }

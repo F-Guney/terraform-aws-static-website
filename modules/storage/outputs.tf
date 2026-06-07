@@ -1,25 +1,25 @@
-output "site_bucket_id" {
-  description = "ID of the bucket for site"
-  value       = aws_s3_bucket.site.id
+output "origin_bucket_id" {
+  description = "ID of the origin bucket."
+  value       = aws_s3_bucket.origin.id
 }
 
-output "site_bucket_arn" {
-  description = "ARN of the bucket for site"
-  value       = aws_s3_bucket.site.arn
+output "origin_bucket_arn" {
+  description = "ARN of the origin bucket."
+  value       = aws_s3_bucket.origin.arn
 }
 
-output "site_bucket_regional_domain_name" {
-  description = "Regional domain name of the bucket for site"
-  value       = aws_s3_bucket.site.bucket_regional_domain_name
+output "origin_bucket_regional_domain_name" {
+  description = "Regional domain name of the origin bucket."
+  value       = aws_s3_bucket.origin.bucket_regional_domain_name
 }
 
 output "logs_bucket_id" {
-  description = "ID of the bucket for logs"
+  description = "ID of the logs bucket."
   value       = aws_s3_bucket.logs.id
 }
 
 output "logs_bucket_arn" {
-  description = "ARN of the bucket for logs"
+  description = "ARN of the logs bucket."
   value       = aws_s3_bucket.logs.arn
 }
 

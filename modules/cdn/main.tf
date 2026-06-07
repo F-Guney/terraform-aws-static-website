@@ -4,14 +4,14 @@ data "aws_cloudfront_cache_policy" "managed_caching_optimized" {
 
 data "aws_caller_identity" "current" {}
 
-resource "aws_cloudfront_origin_access_control" "control" {
+resource "aws_cloudfront_origin_access_control" "this" {
   name                              = local.oac_name
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
   origin_access_control_origin_type = "s3"
 }
 
-resource "aws_cloudfront_distribution" "distribution" {
+resource "aws_cloudfront_distribution" "this" {
   enabled             = true
   default_root_object = var.default_root_object
   price_class         = var.price_class
@@ -21,7 +21,7 @@ resource "aws_cloudfront_distribution" "distribution" {
   origin {
     domain_name              = var.origin_bucket_regional_domain
     origin_id                = local.origin_id
-    origin_access_control_id = aws_cloudfront_origin_access_control.control.id
+    origin_access_control_id = aws_cloudfront_origin_access_control.this.id
   }
 
   default_cache_behavior {
@@ -45,6 +45,13 @@ resource "aws_cloudfront_distribution" "distribution" {
     acm_certificate_arn            = var.acm_certificate_arn
     ssl_support_method             = var.acm_certificate_arn != null ? "sni-only" : null
     minimum_protocol_version       = var.acm_certificate_arn != null ? "TLSv1.2_2021" : null
+  }
+
+  lifecycle {
+    precondition {
+      condition     = length(var.aliases) == 0 || var.acm_certificate_arn != null
+      error_message = "acm_certificate_arn (an ACM cert in us-east-1) is required when aliases are set; CloudFront cannot serve custom domains on the default certificate."
+    }
   }
 }
 
@@ -78,7 +85,7 @@ resource "aws_cloudwatch_log_delivery_source" "cloudfront" {
   region       = "us-east-1"
   name         = "${var.name_prefix}-cf-access-logs"
   log_type     = "ACCESS_LOGS"
-  resource_arn = aws_cloudfront_distribution.distribution.arn
+  resource_arn = aws_cloudfront_distribution.this.arn
 }
 
 resource "aws_cloudwatch_log_delivery_destination" "logs" {
@@ -99,7 +106,7 @@ resource "aws_cloudwatch_log_delivery" "cloudfront" {
   depends_on = [aws_s3_bucket_policy.logs]
 }
 
-resource "aws_s3_bucket_policy" "bucket" {
+resource "aws_s3_bucket_policy" "origin" {
   bucket = var.origin_bucket_id
 
   policy = jsonencode({
@@ -112,7 +119,7 @@ resource "aws_s3_bucket_policy" "bucket" {
         Resource  = "${var.origin_bucket_arn}/*"
         Condition = {
           StringEquals = {
-            "AWS:SourceArn" = aws_cloudfront_distribution.distribution.arn
+            "AWS:SourceArn" = aws_cloudfront_distribution.this.arn
           }
         }
       },
