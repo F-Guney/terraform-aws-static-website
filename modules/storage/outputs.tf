@@ -14,13 +14,13 @@ output "origin_bucket_regional_domain_name" {
 }
 
 output "logs_bucket_id" {
-  description = "ID of the logs bucket."
-  value       = aws_s3_bucket.logs.id
+  description = "ID of the logs bucket (created or bring-your-own)."
+  value       = local.logs_bucket_id
 }
 
 output "logs_bucket_arn" {
-  description = "ARN of the logs bucket."
-  value       = aws_s3_bucket.logs.arn
+  description = "ARN of the logs bucket (created or bring-your-own)."
+  value       = local.logs_bucket_arn
 }
 
 output "site_files_hash" {

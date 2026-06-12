@@ -134,3 +134,73 @@ run "aliases_without_cert_rejected" {
 
   expect_failures = [aws_cloudfront_distribution.this]
 }
+
+run "web_acl_id_wired" {
+  command = plan
+
+  module {
+    source = "./modules/cdn"
+  }
+
+  variables {
+    web_acl_id = "arn:aws:wafv2:us-east-1:123456789012:global/webacl/test/abcd-1234"
+  }
+
+  assert {
+    condition     = aws_cloudfront_distribution.this.web_acl_id == "arn:aws:wafv2:us-east-1:123456789012:global/webacl/test/abcd-1234"
+    error_message = "web_acl_id must pass through to the distribution"
+  }
+}
+
+run "geo_restriction_applied" {
+  command = plan
+
+  module {
+    source = "./modules/cdn"
+  }
+
+  variables {
+    geo_restriction = { restriction_type = "whitelist", locations = ["US", "CA"] }
+  }
+
+  assert {
+    condition     = aws_cloudfront_distribution.this.restrictions[0].geo_restriction[0].restriction_type == "whitelist"
+    error_message = "geo_restriction.restriction_type must drive the distribution restriction"
+  }
+
+  assert {
+    condition     = contains(aws_cloudfront_distribution.this.restrictions[0].geo_restriction[0].locations, "US")
+    error_message = "geo_restriction.locations must be applied to the distribution"
+  }
+}
+
+run "geo_restriction_whitelist_requires_locations" {
+  command = plan
+
+  module {
+    source = "./modules/cdn"
+  }
+
+  variables {
+    geo_restriction = { restriction_type = "whitelist", locations = [] }
+  }
+
+  expect_failures = [var.geo_restriction]
+}
+
+run "log_prefix_overridable" {
+  command = plan
+
+  module {
+    source = "./modules/cdn"
+  }
+
+  variables {
+    log_prefix = "audit"
+  }
+
+  assert {
+    condition     = aws_cloudwatch_log_delivery_destination.logs.delivery_destination_configuration[0].destination_resource_arn == "arn:aws:s3:::test-logging-bucket/audit"
+    error_message = "log_prefix must set the log delivery destination key prefix"
+  }
+}

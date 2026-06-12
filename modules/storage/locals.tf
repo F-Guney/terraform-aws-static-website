@@ -1,5 +1,7 @@
 locals {
   logs_bucket_name = "${var.bucket_name}${var.logs_bucket_suffix}"
+  logs_bucket_id   = var.create_log_bucket ? aws_s3_bucket.logs[0].id : var.log_bucket
+  logs_bucket_arn  = var.create_log_bucket ? aws_s3_bucket.logs[0].arn : (var.log_bucket != null ? "arn:aws:s3:::${var.log_bucket}" : null)
 
   content_types = {
     "html"  = "text/html"

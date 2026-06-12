@@ -77,3 +77,73 @@ variable "kms_key_arn" {
   type        = string
   default     = null
 }
+
+variable "create_route53_records" {
+  description = "Create Route53 alias records pointing at the distribution. Requires route53_zone_id."
+  type        = bool
+  default     = false
+}
+
+variable "route53_zone_id" {
+  description = "Route53 hosted zone ID for alias records. Required when create_route53_records is true."
+  type        = string
+  default     = null
+}
+
+variable "is_ipv6_enabled" {
+  description = "Whether the distribution responds to IPv6 (AAAA) requests."
+  type        = bool
+  default     = true
+}
+
+variable "web_acl_id" {
+  description = "ARN of a WAFv2 Web ACL (scope = CLOUDFRONT, created in us-east-1) to associate. Null disables WAF."
+  type        = string
+  default     = null
+}
+
+variable "geo_restriction" {
+  description = "CloudFront geo-restriction. restriction_type is none|whitelist|blacklist; locations are ISO 3166-1-alpha-2 country codes (empty when none)."
+  type = object({
+    restriction_type = string
+    locations        = list(string)
+  })
+  default = {
+    restriction_type = "none"
+    locations        = []
+  }
+
+  validation {
+    condition     = contains(["none", "whitelist", "blacklist"], var.geo_restriction.restriction_type)
+    error_message = "geo_restriction.restriction_type must be one of none, whitelist, blacklist."
+  }
+
+  validation {
+    condition     = var.geo_restriction.restriction_type == "none" ? length(var.geo_restriction.locations) == 0 : length(var.geo_restriction.locations) > 0
+    error_message = "Provide locations for whitelist/blacklist, and none for 'none'."
+  }
+}
+
+variable "logs_retention_days" {
+  description = "Days to retain CloudFront access logs before lifecycle expiration."
+  type        = number
+  default     = 30
+}
+
+variable "create_log_bucket" {
+  description = "Create a dedicated S3 bucket for access logs. Set false to reuse an existing bucket via log_bucket."
+  type        = bool
+  default     = true
+}
+
+variable "log_bucket" {
+  description = "Name of an existing bucket to write logs to. Required when create_log_bucket is false."
+  type        = string
+  default     = null
+}
+
+variable "log_prefix" {
+  description = "S3 key prefix under the log bucket where CloudFront access logs are written."
+  type        = string
+  default     = "cloudfront"
+}

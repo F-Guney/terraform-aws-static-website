@@ -31,9 +31,14 @@ module "cdn" {
 | origin\_bucket\_regional\_domain | Bucket regional domain of the origin. | `string` | n/a | yes |
 | acm\_certificate\_arn | ARN of an ACM certificate in us-east-1. Null uses the default *.cloudfront.net cert. | `string` | `null` | no |
 | aliases | Alternate domain names (CNAMEs). Only applied when a custom cert is set. | `list(string)` | `[]` | no |
+| create\_response\_headers\_policy | Whether to create a response headers policy for the CloudFront distribution. | `bool` | `false` | no |
 | default\_root\_object | Default object served at / | `string` | `"index.html"` | no |
+| geo\_restriction | CloudFront geo-restriction. restriction\_type is none\|whitelist\|blacklist; locations are ISO 3166-1-alpha-2 country codes (empty when none). | ```object({ restriction_type = string locations = list(string) })``` | ```{ "locations": [], "restriction_type": "none" }``` | no |
+| is\_ipv6\_enabled | Whether the distribution responds to IPv6 (AAAA) requests. | `bool` | `true` | no |
+| log\_prefix | S3 key prefix under the log bucket where CloudFront access logs are written. | `string` | `"cloudfront"` | no |
 | price\_class | CloudFront price class. Defaults to PriceClass\_100 for portfolio cost. | `string` | `"PriceClass_100"` | no |
 | tags | Tags applied to every resource the module creates. | `map(string)` | `{}` | no |
+| web\_acl\_id | ARN of a WAFv2 Web ACL (scope = CLOUDFRONT, created in us-east-1) to associate. Null disables WAF. | `string` | `null` | no |
 
 ## Outputs
 
@@ -42,6 +47,7 @@ module "cdn" {
 | distribution\_arn | CloudFront distribution ARN. |
 | distribution\_id | CloudFront distribution ID |
 | domain\_name | Public CloudFront domain |
+| hosted\_zone\_id | CloudFront distribution hosted zone ID (for Route53 alias records). |
 | oac\_id | Origin Access Control ID. |
 | url | Convenience HTTPS URL of the distribution. |
 <!-- END_TF_DOCS -->

@@ -9,10 +9,13 @@ provider "aws" {
 module "storage" {
   source = "./modules/storage"
 
-  bucket_name     = var.bucket_name
-  site_source_dir = var.site_source_dir
-  kms_key_arn     = var.kms_key_arn
-  tags            = local.common_tags
+  bucket_name         = var.bucket_name
+  site_source_dir     = var.site_source_dir
+  kms_key_arn         = var.kms_key_arn
+  logs_retention_days = var.logs_retention_days
+  create_log_bucket   = var.create_log_bucket
+  log_bucket          = var.log_bucket
+  tags                = local.common_tags
 }
 
 module "cdn" {
@@ -28,6 +31,20 @@ module "cdn" {
   aliases                       = var.aliases
   default_root_object           = var.default_root_object
   price_class                   = var.cloudfront_price_class
+  is_ipv6_enabled               = var.is_ipv6_enabled
+  web_acl_id                    = var.web_acl_id
+  geo_restriction               = var.geo_restriction
+  log_prefix                    = var.log_prefix
+}
+
+module "dns" {
+  source = "./modules/dns"
+  count  = var.create_route53_records ? 1 : 0
+
+  route53_zone_id             = var.route53_zone_id
+  aliases                     = var.aliases
+  distribution_domain_name    = module.cdn.domain_name
+  distribution_hosted_zone_id = module.cdn.hosted_zone_id
 }
 
 action "aws_cloudfront_create_invalidation" "invalidate" {

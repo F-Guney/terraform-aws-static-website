@@ -37,6 +37,18 @@ variable "logs_retention_days" {
   default     = 30
 }
 
+variable "create_log_bucket" {
+  description = "Create a dedicated S3 bucket for access logs. Set false to reuse an existing bucket via log_bucket."
+  type        = bool
+  default     = true
+}
+
+variable "log_bucket" {
+  description = "Name of an existing bucket to write logs to. Required when create_log_bucket is false."
+  type        = string
+  default     = null
+}
+
 variable "kms_key_arn" {
   description = "KMS key ARN (in the bucket's region) for SSE-KMS. Null uses SSE-S3 (AES256)."
   type        = string

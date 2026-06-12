@@ -21,7 +21,9 @@ module "storage" {
 | ---- | ----------- | ---- | ------- | :------: |
 | bucket\_name | Unique S3 bucket name for the site origin (must follow S3 naming rules). | `string` | n/a | yes |
 | site\_source\_dir | Local directory whose contents will be uploaded to the origin bucket. | `string` | n/a | yes |
+| create\_log\_bucket | Create a dedicated S3 bucket for access logs. Set false to reuse an existing bucket via log\_bucket. | `bool` | `true` | no |
 | kms\_key\_arn | KMS key ARN (in the bucket's region) for SSE-KMS. Null uses SSE-S3 (AES256). | `string` | `null` | no |
+| log\_bucket | Name of an existing bucket to write logs to. Required when create\_log\_bucket is false. | `string` | `null` | no |
 | logs\_bucket\_suffix | Suffix appended to bucket\_name to derive the logs bucket name. | `string` | `"-logs"` | no |
 | logs\_retention\_days | Days to retain access logs before lifecycle expiration. | `number` | `30` | no |
 | tags | Tags applied to every resource the module creates. | `map(string)` | `{}` | no |
@@ -31,8 +33,8 @@ module "storage" {
 
 | Name | Description |
 | ---- | ----------- |
-| logs\_bucket\_arn | ARN of the logs bucket. |
-| logs\_bucket\_id | ID of the logs bucket. |
+| logs\_bucket\_arn | ARN of the logs bucket (created or bring-your-own). |
+| logs\_bucket\_id | ID of the logs bucket (created or bring-your-own). |
 | origin\_bucket\_arn | ARN of the origin bucket. |
 | origin\_bucket\_id | ID of the origin bucket. |
 | origin\_bucket\_regional\_domain\_name | Regional domain name of the origin bucket. |

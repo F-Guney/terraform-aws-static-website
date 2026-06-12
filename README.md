@@ -20,8 +20,9 @@ flowchart LR
 - Private S3 origin: public access blocked, `BucketOwnerEnforced`, versioning on, AES256 by default with opt-in SSE-KMS via `kms_key_arn`
 - CloudFront distribution with OAC, HTTPS-only viewer policy, `PriceClass_100` (US + EU + IL) by default; `TLSv1.2_2021` floor when a custom ACM cert is wired
 - Per-extension cache headers on uploads: HTML revalidates every 5 min, JS/CSS cached for a year (`immutable`), images 1 day
-- Sibling logs bucket receiving CloudFront access logs via CloudWatch Log Delivery v2, expiring after 30 days
+- Sibling logs bucket receiving CloudFront access logs via CloudWatch Log Delivery v2, expiring after `logs_retention_days` (30 by default); bring-your-own bucket via `create_log_bucket`/`log_bucket` and custom `log_prefix`
 - Optional custom domain: pass `acm_certificate_arn` (in us-east-1) and `aliases` to attach CNAMEs
+- Opt-in security & scale knobs, all off by default: WAFv2 association (`web_acl_id`), IPv6 (`is_ipv6_enabled`), and geo-restriction (`geo_restriction`)
 - `default_tags` propagating `Project`, `Environment`, `ManagedBy`, `Owner`, `CostCenter`, `Repository` to every taggable resource
 
 <!-- BEGIN_TF_DOCS -->
@@ -36,11 +37,20 @@ flowchart LR
 | aws\_region | AWS region to deploy resources to | `string` | `"eu-central-1"` | no |
 | cloudfront\_price\_class | CloudFront price class. | `string` | `"PriceClass_100"` | no |
 | cost\_center | Billing identifier used to attribute spend in AWS Cost Explorer. Tag value, not a real charge code for portfolio use. | `string` | `"personal"` | no |
+| create\_log\_bucket | Create a dedicated S3 bucket for access logs. Set false to reuse an existing bucket via log\_bucket. | `bool` | `true` | no |
+| create\_route53\_records | Create Route53 alias records pointing at the distribution. Requires route53\_zone\_id. | `bool` | `false` | no |
 | default\_root\_object | Object CloudFront serves at the distribution root. | `string` | `"index.html"` | no |
 | environment | Environment name. | `string` | `"dev"` | no |
+| geo\_restriction | CloudFront geo-restriction. restriction\_type is none\|whitelist\|blacklist; locations are ISO 3166-1-alpha-2 country codes (empty when none). | ```object({ restriction_type = string locations = list(string) })``` | ```{ "locations": [], "restriction_type": "none" }``` | no |
+| is\_ipv6\_enabled | Whether the distribution responds to IPv6 (AAAA) requests. | `bool` | `true` | no |
 | kms\_key\_arn | KMS key ARN (same region as the origin bucket) for SSE-KMS. Null uses AES256. | `string` | `null` | no |
+| log\_bucket | Name of an existing bucket to write logs to. Required when create\_log\_bucket is false. | `string` | `null` | no |
+| log\_prefix | S3 key prefix under the log bucket where CloudFront access logs are written. | `string` | `"cloudfront"` | no |
+| logs\_retention\_days | Days to retain CloudFront access logs before lifecycle expiration. | `number` | `30` | no |
 | owner | Owner of the project. | `string` | `"demoadmin"` | no |
+| route53\_zone\_id | Route53 hosted zone ID for alias records. Required when create\_route53\_records is true. | `string` | `null` | no |
 | site\_source\_dir | Local directory uploaded to the origin bucket. | `string` | `"www"` | no |
+| web\_acl\_id | ARN of a WAFv2 Web ACL (scope = CLOUDFRONT, created in us-east-1) to associate. Null disables WAF. | `string` | `null` | no |
 
 ## Outputs
 
